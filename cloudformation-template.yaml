@@ -1,0 +1,193 @@
+Metadata:
+  AWSToolsMetrics:
+    IaC_Generator: "arn:aws:cloudformation:us-east-1:752227508740:generatedTemplate/28bf3534-7712-4b45-aa91-49f0187ed042"
+Parameters:
+  LambdaFunction00documentSummaryGenerator00PEdAlCodeS3BucketVbaOK:
+    NoEcho: "true"
+    Type: "String"
+    Description: "An Amazon S3 bucket in the same AWS-Region as your function. The\
+      \ bucket can be in a different AWS-account."
+  LambdaFunction00documentSummaryGenerator00PEdAlCodeS3Key3Qe7I:
+    NoEcho: "true"
+    Type: "String"
+    Description: "The Amazon S3 key of the deployment package."
+Resources:
+  IAMRole00documentSummaryGeneratorrolezv84yzbd00he49z:
+    UpdateReplacePolicy: "Retain"
+    Type: "AWS::IAM::Role"
+    DeletionPolicy: "Delete"
+    Properties:
+      Path: "/service-role/"
+      ManagedPolicyArns:
+      - Ref: "IAMManagedPolicy00policyserviceroleAWSLambdaBasicExecutionRolee3710de3832d4ccab3a81123f687921b00zGJwS"
+      MaxSessionDuration: 3600
+      RoleName: "documentSummaryGenerator-role-zv84yzbd"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+        - Action: "sts:AssumeRole"
+          Effect: "Allow"
+          Principal:
+            Service: "lambda.amazonaws.com"
+  LambdaFunction00documentSummaryGenerator00PEdAl:
+    UpdateReplacePolicy: "Retain"
+    Type: "AWS::Lambda::Function"
+    DeletionPolicy: "Delete"
+    Properties:
+      MemorySize: 128
+      Description: ""
+      TracingConfig:
+        Mode: "PassThrough"
+      Timeout: 20
+      RuntimeManagementConfig:
+        UpdateRuntimeOn: "Auto"
+      Handler: "lambda_function.lambda_handler"
+      Code:
+        S3Bucket:
+          Ref: "LambdaFunction00documentSummaryGenerator00PEdAlCodeS3BucketVbaOK"
+        S3Key:
+          Ref: "LambdaFunction00documentSummaryGenerator00PEdAlCodeS3Key3Qe7I"
+      Role:
+        Fn::GetAtt:
+        - "IAMRole00documentSummaryGeneratorrolezv84yzbd00he49z"
+        - "Arn"
+      FileSystemConfigs: []
+      FunctionName: "documentSummaryGenerator"
+      Runtime: "python3.13"
+      PackageType: "Zip"
+      LoggingConfig:
+        LogFormat: "Text"
+        LogGroup: "/aws/lambda/documentSummaryGenerator"
+      RecursiveLoop: "Terminate"
+      EphemeralStorage:
+        Size: 512
+      Architectures:
+      - "x86_64"
+  S3Bucket00summariesdocsbucket003qcp1:
+    UpdateReplacePolicy: "Retain"
+    Type: "AWS::S3::Bucket"
+    DeletionPolicy: "Delete"
+    Properties:
+      PublicAccessBlockConfiguration:
+        RestrictPublicBuckets: true
+        IgnorePublicAcls: true
+        BlockPublicPolicy: true
+        BlockPublicAcls: true
+      BucketName: "summaries-docs-bucket-020125"
+      OwnershipControls:
+        Rules:
+        - ObjectOwnership: "BucketOwnerEnforced"
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+        - BucketKeyEnabled: true
+          ServerSideEncryptionByDefault:
+            SSEAlgorithm: "AES256"
+  S3Bucket00uploadeddocsbucket00qxa9m:
+    UpdateReplacePolicy: "Retain"
+    Type: "AWS::S3::Bucket"
+    DeletionPolicy: "Delete"
+    DependsOn: LambdaFunction00documentSummaryGenerator00PEdAl
+    Properties:
+      PublicAccessBlockConfiguration:
+        RestrictPublicBuckets: true
+        IgnorePublicAcls: true
+        BlockPublicPolicy: true
+        BlockPublicAcls: true
+      BucketName: "uploaded-docs-bucket"
+      OwnershipControls:
+        Rules:
+        - ObjectOwnership: "BucketOwnerEnforced"
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+        - BucketKeyEnabled: true
+          ServerSideEncryptionByDefault:
+            SSEAlgorithm: "AES256"
+  IAMManagedPolicy00policyserviceroleAWSLambdaBasicExecutionRolee3710de3832d4ccab3a81123f687921b00zGJwS:
+    UpdateReplacePolicy: "Retain"
+    Type: "AWS::IAM::ManagedPolicy"
+    DeletionPolicy: "Delete"
+    Properties:
+      ManagedPolicyName: "AWSLambdaBasicExecutionRole-e3710de3-832d-4cca-b3a8-1123f687921b"
+      Path: "/service-role/"
+      Description: ""
+      Groups: []
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+        - Resource: "arn:aws:logs:us-east-1:752227508740:*"
+          Action: "logs:CreateLogGroup"
+          Effect: "Allow"
+        - Resource:
+          - "arn:aws:logs:us-east-1:752227508740:log-group:/aws/lambda/documentSummaryGenerator:*"
+          Action:
+          - "logs:CreateLogStream"
+          - "logs:PutLogEvents"
+          Effect: "Allow"
+        - Resource:
+          - "arn:aws:s3:::uploaded-docs-bucket"
+          - "arn:aws:s3:::uploaded-docs-bucket/*"
+          - "arn:aws:s3:::summaries-docs-bucket-020125"
+          - "arn:aws:s3:::summaries-docs-bucket-020125/*"
+          Action:
+          - "s3:GetObject"
+          - "s3:ListBucket"
+          Effect: "Allow"
+        - Resource: "*"
+          Action:
+          - "bedrock:InvokeModel"
+          Effect: "Allow"
+      Users: []
+  S3BucketPolicy00summariesdocsbucket007nsJc:
+    UpdateReplacePolicy: "Retain"
+    Type: "AWS::S3::BucketPolicy"
+    DeletionPolicy: "Delete"
+    DependsOn: S3Bucket00summariesdocsbucket003qcp1
+    Properties:
+      Bucket:
+        Ref: "S3Bucket00summariesdocsbucket003qcp1"
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+        - Resource:
+          - "arn:aws:s3:::summaries-docs-bucket-020125"
+          - "arn:aws:s3:::summaries-docs-bucket-020125/*"
+          Action: "s3:PutObject"
+          Effect: "Allow"
+          Principal:
+            AWS: !GetAtt IAMRole00documentSummaryGeneratorrolezv84yzbd00he49z.Arn
+  S3BucketPolicy00uploadeddocsbucket00hmVFr:
+    UpdateReplacePolicy: "Retain"
+    Type: "AWS::S3::BucketPolicy"
+    DeletionPolicy: "Delete"
+    Properties:
+      Bucket:
+        Ref: "S3Bucket00uploadeddocsbucket00qxa9m"
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+        - Resource:
+          - "arn:aws:s3:::uploaded-docs-bucket"
+          - "arn:aws:s3:::uploaded-docs-bucket/*"
+          Action:
+          - "s3:ListBucket"
+          - "s3:GetObject"
+          Effect: "Allow"
+          Principal:
+            AWS: !GetAtt IAMRole00documentSummaryGeneratorrolezv84yzbd00he49z.Arn
+          Sid: "Statement1"
+  LambdaPermission00functiondocumentSummaryGenerator007bhBR:
+    UpdateReplacePolicy: "Retain"
+    Type: "AWS::Lambda::Permission"
+    DeletionPolicy: "Delete"
+    Properties:
+      FunctionName:
+        Fn::GetAtt:
+        - "LambdaFunction00documentSummaryGenerator00PEdAl"
+        - "Arn"
+      Action: "lambda:InvokeFunction"
+      SourceArn:
+        Fn::GetAtt:
+        - "S3Bucket00uploadeddocsbucket00qxa9m"
+        - "Arn"
+      Principal: "s3.amazonaws.com"
+      SourceAccount: !Sub "${AWS::AccountId}"

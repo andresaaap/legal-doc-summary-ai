@@ -1,0 +1,10 @@
+[
+  {
+    "ParameterKey": "LambdaFunction00documentSummaryGenerator00PEdAlCodeS3BucketVbaOK",
+    "ParameterValue": "lambda-code-legal-doc-summary-ai-020125"
+  },
+  {
+    "ParameterKey": "LambdaFunction00documentSummaryGenerator00PEdAlCodeS3Key3Qe7I",
+    "ParameterValue": "document_summary_lambda.zip"
+  }
+]
